@@ -29,7 +29,7 @@ Sendo que `<key>` é a string em ASCII usada para encriptar os dados
 
 Ambos os arquivos foram obfuscados usando a string 'ABC'
 
-## Deobfuscando o arquivo "crypt1.dat"
+## Deobfuscando o arquivo "crypt2.dat"
 
 Comentário que veio com o problema:
 ```
@@ -45,6 +45,13 @@ specially concerning the calling convention.
 If you detect the defect, you should fix it according to the same
 strategy as described above.
 ```
+
+Segmentation Fault recebido ao tentar executar o `decode` no crypt2.dat! Olhando no GDB:
+![](https://i.imgur.com/xzpuMj0.png)
+
+A diferença no tamanho dos arquivos é bem grande:
+![](https://i.imgur.com/oPQmsSS.png)
+O GDB mostra que não está conseguindo acessar certa região de memória.
 
 ## Finalizando o desafio e preparando entrega final
 

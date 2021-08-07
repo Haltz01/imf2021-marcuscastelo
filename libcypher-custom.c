@@ -5,6 +5,15 @@ int unlock() {
     return 1;
 }
 
+// Não funcionou, melhor fazer em assembly direto...
+// int change(int param_1, int param_2) {
+//     int uVar1;
+
+//     uVar1 = (param_1 + param_2 >> 0x1f) >> 0x18;
+//     return (param_1 + param_2 + uVar1 & 0xff) - uVar1;
+// }
+
+
 // int cypher(int fdin, int fdout, int arg10, int arg14) {
 //     printf("Custom cypher\n");
 
