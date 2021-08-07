@@ -1,19 +1,34 @@
 all: decode-custom run-custom-crypt1 run-custom-crypt2
 
-# Gera o "decode" sem modificações nossas
-decode:
-	gcc -m32 -o decode decode.o -lcypher -L.
+BINARIES = decode decode-custom
 
-# Gera a versão modificada do decode, usando a nossa lib
+# Indica que a libcypher está na raiz do diretório
+CC = gcc
+C_FLAGS = -m32
+L_FLAGS = -lcypher -L.
+
+# Gera o "decode" sem modificações nossas
+decode: decode.o
+	$(CC) $(CFLAGS) $^ $(L_FLAGS) -o $@
+
+# Gera a versão modificada do decode, usando a nossa lib com maior prioridade que a lib original
 decode-custom: libcypher-custom.so
-	gcc -m32 -o decode-custom decode.o -lcypher-custom -lcypher -L.
+	$(CC) $(CFLAGS) $^ -lcypher-custom $(L_FLAGS) -o decode-custom
+
 
 # Gera nossa libcypher customizada (só tem a função unlock() e change())
-libcypher-custom.so: libcypher-custom.c 
-	gcc -m32 -c libcypher-custom.c -o libcypher-custom.o -fpic
-	gcc -m32 -shared libcypher-custom.o change-custom.o -o libcypher-custom.so
+libcypher-custom.so: libcypher-custom.o change-custom.o
+
+# Regra geral de compilação de DLLs (biblioteca dinâmica)
+%.so: %.c 
+	$(CC) $(CFLAGS) -shared $^ -o $@
+
+# Regra geral de compilação de objetos
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@ -fpic
 
 # Gera o objeto da versão modificada da função change() a partir do assembly
+# OBS: sobrescreve a regra anterior para esse objeto, que vem diretamente do assembly
 # Não consegui usar sintaxe INTEL :(
 change-custom.o: change-custom-ATnT.S
 	as -32 change-custom-ATnT.S -o change-custom.o
@@ -33,9 +48,9 @@ run-custom-crypt1: decode-custom
 # A saída é um arquivo Bitmap (.bmp)
 .PHONY: run-custom-crypt2
 run-custom-crypt2: decode-custom
-	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt2.dat crypt2.bpm
+	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt2.dat crypt2.bmp
 
 # ===== Limpando arquivos =====
 .PHONY: clean
 clean:
-	rm -f change-custom.o libcypher-custom.o decode decode-custom
+	rm -f change-custom.o libcypher-custom.o decode decode-custom rm crypt1.png crypt2.bmp
