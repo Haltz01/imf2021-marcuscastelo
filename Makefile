@@ -1,19 +1,41 @@
-all: decode run
+all: decode-custom run-custom-crypt1 run-custom-crypt2
 
+# Gera o "decode" sem modificações nossas
 decode:
 	gcc -m32 -o decode decode.o -lcypher -L.
 
-decode2: libcypher2.so
-	gcc -m32 -o decode2 decode.o -lcypher2 -lcypher -L.
+# Gera a versão modificada do decode, usando a nossa lib
+decode-custom: libcypher-custom.so
+	gcc -m32 -o decode-custom decode.o -lcypher-custom -lcypher -L.
 
-libcypher2.so: libcypher2.c 
-	gcc -m32 -c libcypher2.c -o libcypher2.o -fpic
-	gcc -m32 -shared libcypher2.o -o libcypher2.so
+# Gera nossa libcypher customizada (só tem a função unlock() e change())
+libcypher-custom.so: libcypher-custom.c 
+	gcc -m32 -c libcypher-custom.c -o libcypher-custom.o -fpic
+	gcc -m32 -shared libcypher-custom.o change-custom.o -o libcypher-custom.so
 
+# Gera o objeto da versão modificada da função change() a partir do assembly
+# Não consegui usar sintaxe INTEL :(
+change-custom.o: change-custom-ATnT.S
+	as -32 change-custom-ATnT.S -o change-custom.o
+
+# Roda o "decode" sem quaiquer modificações
 .PHONY: run
 run: decode
 	LD_LIBRARY_PATH=. ./decode -d -k ABC crypt2.dat crypt2.png
 
-.PHONY: run2
-run2: decode2
-	LD_LIBRARY_PATH=. ./decode2 -d -k ABC crypt2.dat crypt2.png
+# ===== Deobfuscando o arquivo crypt1 com a nossa lib customizada =====
+# A saída é um arquivo PNG (.png)
+.PHONY: run-custom-crypt1
+run-custom-crypt1: decode-custom
+	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt1.dat crypt1.png
+
+# ===== Deobfuscando o arquivo crypt2 com a nossa lib customizada + função change() limpando a stack corretamente =====
+# A saída é um arquivo Bitmap (.bmp)
+.PHONY: run-custom-crypt2
+run-custom-crypt2: decode-custom
+	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt2.dat crypt2.bpm
+
+# ===== Limpando arquivos =====
+.PHONY: clean
+clean:
+	rm -f change-custom.o libcypher-custom.o decode decode-custom
