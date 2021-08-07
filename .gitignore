@@ -1,5 +1,5 @@
 decode
-decode2
+decode-custom
 explore
 *.o
 *.so

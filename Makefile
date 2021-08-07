@@ -3,15 +3,15 @@ all: decode run
 decode:
 	gcc -m32 -o decode decode.o -lcypher -L.
 
-decode2: libcypher2.so
-	gcc -m32 -o decode2 decode.o -lcypher2 -lcypher -L.
+decode-custom: libcypher-custom.so
+	gcc -m32 -o decode-custom decode.o -lcypher-custom -lcypher -L.
 
 explore: explore.c
 	gcc -m32 -o explore explore.c -lcypher -L.
 
-libcypher2.so: libcypher2.c 
-	gcc -m32 -c libcypher2.c -o libcypher2.o -fpic
-	gcc -m32 -shared libcypher2.o -o libcypher2.so
+libcypher-custom.so: libcypher-custom.c 
+	gcc -m32 -c libcypher-custom.c -o libcypher-custom.o -fpic
+	gcc -m32 -shared libcypher-custom.o -o libcypher-custom.so
 
 .PHONY: runex
 runex: explore
@@ -21,6 +21,10 @@ runex: explore
 run: decode
 	LD_LIBRARY_PATH=. ./decode
 
-.PHONY: run2
-run2: decode2
-	LD_LIBRARY_PATH=. ./decode2 -d -k ABC crypt1.dat crypt1.png
+.PHONY: run-custom-crypt1
+run-custom-crypt1: decode-custom
+	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt1.dat crypt1.png
+
+.PHONY: run-custom-crypt2
+run-custom-crypt2: decode-custom
+	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt2.dat crypt2.png

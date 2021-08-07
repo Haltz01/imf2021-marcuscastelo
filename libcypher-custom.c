@@ -38,3 +38,9 @@ int unlock() {
 
 //     return 1;
 // }
+
+
+// int cypher() {
+//     printf("Custom cypher\n");
+//     return 1;
+// }

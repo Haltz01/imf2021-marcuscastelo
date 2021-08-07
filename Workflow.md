@@ -18,6 +18,7 @@ Usando softwares de _reverse engineering_ como o Ghidra, Binary Ninja e Radare2,
 
 ## Elaborando Makefile para buildar o "decode"
 
+No Ubuntu 18.04 64 bits, para compilar o "decode" é necessário instalar o GCC para outras arquiteturas - nesse caso 32-bits - usando `sudo apt install gcc-multilib`.
 ## Executando o programa
 
 ## Deobfuscando o arquivo "crypt1.dat"
