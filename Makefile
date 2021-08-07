@@ -5,13 +5,13 @@ decode:
 	gcc -m32 -o decode decode.o -lcypher -L.
 
 # Gera a versão modificada do decode, usando a nossa lib
-decode-custom: libcypher-custom.so change-custom.o
-	gcc -m32 -o decode-custom decode.o change-custom.o -lcypher-custom -lcypher -L.
+decode-custom: libcypher-custom.so
+	gcc -m32 -o decode-custom decode.o -lcypher-custom -lcypher -L.
 
-# Gera nossa libcypher customizada (só tem a função unlock)
+# Gera nossa libcypher customizada (só tem a função unlock() e change())
 libcypher-custom.so: libcypher-custom.c 
 	gcc -m32 -c libcypher-custom.c -o libcypher-custom.o -fpic
-	gcc -m32 -shared libcypher-custom.o -o libcypher-custom.so
+	gcc -m32 -shared libcypher-custom.o change-custom.o -o libcypher-custom.so
 
 # Gera o objeto da versão modificada da função change() a partir do assembly
 # Não consegui usar sintaxe INTEL :(
@@ -34,3 +34,8 @@ run-custom-crypt1: decode-custom
 .PHONY: run-custom-crypt2
 run-custom-crypt2: decode-custom
 	LD_LIBRARY_PATH=. ./decode-custom -d -k ABC crypt2.dat crypt2.bpm 
+
+# ===== Limpando arquivos =====
+.PHONY: clean
+clean:
+	rm -f change-custom.o libcypher-custom.o decode decode-custom
