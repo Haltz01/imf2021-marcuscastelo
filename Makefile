@@ -4,23 +4,23 @@ BINARIES = decode decode-custom
 
 # Indica que a libcypher está na raiz do diretório
 CC = gcc
-C_FLAGS = -m32
-L_FLAGS = -lcypher -L.
+CFLAGS = -m32
+LDFLAGS = -L.
 
 # Gera o "decode" sem modificações nossas
 decode: decode.o
-	$(CC) $(CFLAGS) $^ $(L_FLAGS) -o $@
+	$(CC) $(CFLAGS) $^ -lcypher $(LDFLAGS) -o $@
 
 # Gera a versão modificada do decode, usando a nossa lib com maior prioridade que a lib original
-decode-custom: libcypher-custom.so
-	$(CC) $(CFLAGS) $^ -lcypher-custom $(L_FLAGS) -o decode-custom
+decode-custom: decode.o libcypher-custom.so
+	$(CC) $(CFLAGS) $^ -lcypher-custom -lcypher $(LDFLAGS) -o decode-custom
 
 
 # Gera nossa libcypher customizada (só tem a função unlock() e change())
 libcypher-custom.so: libcypher-custom.o change-custom.o
 
 # Regra geral de compilação de DLLs (biblioteca dinâmica)
-%.so: %.c 
+%.so: %.o 
 	$(CC) $(CFLAGS) -shared $^ -o $@
 
 # Regra geral de compilação de objetos
@@ -53,4 +53,4 @@ run-custom-crypt2: decode-custom
 # ===== Limpando arquivos =====
 .PHONY: clean
 clean:
-	rm -f change-custom.o libcypher-custom.o decode decode-custom rm crypt1.png crypt2.bmp
+	rm -f change-custom.o libcypher-custom.o decode decode-custom crypt1.png crypt2.bmp
