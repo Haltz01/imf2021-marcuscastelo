@@ -7,6 +7,9 @@ CC = gcc
 CFLAGS = -m32
 LDFLAGS = -L.
 
+# (intel ou atnt)
+CHANGE_CUSTOM_SYNTAX ?= intel
+
 # Gera o "decode" sem modificações nossas
 decode: decode.o
 	$(CC) $(CFLAGS) $^ -lcypher $(LDFLAGS) -o $@
@@ -29,9 +32,14 @@ libcypher-custom.so: libcypher-custom.o change-custom.o
 
 # Gera o objeto da versão modificada da função change() a partir do assembly
 # OBS: sobrescreve a regra anterior para esse objeto, que vem diretamente do assembly
-# Não consegui usar sintaxe INTEL :(
+ifeq ($(CHANGE_CUSTOM_SYNTAX),atnt)
 change-custom.o: change-custom-ATnT.S
-	as -32 change-custom-ATnT.S -o change-custom.o
+	gcc -c -m32 change-custom-ATnT.S -o change-custom.o -nostdlib -no-pie
+else ifeq ($(CHANGE_CUSTOM_SYNTAX),intel)
+change-custom.o: change-custom-INTEL.S
+	gcc -c -m32 change-custom-INTEL.S -o change-custom.o -nostdlib -no-pie
+endif
+
 
 # Roda o "decode" sem quaiquer modificações
 .PHONY: run
