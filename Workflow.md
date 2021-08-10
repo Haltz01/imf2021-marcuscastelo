@@ -47,13 +47,25 @@ strategy as described above.
 ```
 
 Segmentation Fault recebido ao tentar executar o `decode` no crypt2.dat! Olhando no GDB:
+
 ![](https://i.imgur.com/xzpuMj0.png)
 
 A diferença no tamanho dos arquivos é bem grande:
+
 ![](https://i.imgur.com/oPQmsSS.png)
-O GDB mostra que não está conseguindo acessar certa região de memória.
+
+O GDB mostra que não está conseguindo acessar certa região de memória. O que está acontecendo aparentemente é que a stack está ficando tão grande que ultrapassa seu limite...
+
+Finalmente, analisando no Ghidra e no GDB, descobrimos que a função `change()` não está limpando o espaço alocado na stack para seus argumentos, ou seja, seu "stack frame" não é devidamente removido da stack. Sendo assim, a stack fica cada vez mais cheia, até que recebemos um "Segmentation Fault".
+
+Sendo assim, como podemos alterar a `libcypher.so`, basta fazer uma versão nossa da `change()` limpando a stack da maneira correta. Fizemos 2 versões: uma usando sintaxe AT&T e outra com sintaxe Intel. Para ambos os arquivos, só andamos 16 bytes com o stack pointer, desalocando esses bytes da stack depois de chamar a função `change()`. Como base para a nossa versão, pegamos a `change()` da própria libcypher utilizando `objdump -D -M <tipo_sintaxe> libcypher.so`.
+
+Feito isso, conseguimos decriptar corretamente o `crypt2.dat`.
 
 ## Finalizando o desafio e preparando entrega final
 
+Com as modificações feitas nos arquivos presentes nesse repositório e o `Makefile` aqui presente é possível concluir o desafio. Basta dar um `make all` que o "decode" será compilado e executado para deobfuscar os arquivos `crypt1.dat` e `crypt2.dat`.
+
+Um detalhe imporante é que para evitar que o `decode` seja modificado, não podemos compilá-lo fazendo o _link_ com a nossa versão da lib. Na verdade, devemos, ao executar o `decode`, usar o `LD_PRELOAD` para carregar a nossa lib ao executar o binário. O linker dinâmico irá fazer isso para nós.
+
 - Fazer o tarball
-- Conferir se o "decode" é capaz de deobfuscar ambos os arquivos "crypt1.dat" e "crypt2.dat"
