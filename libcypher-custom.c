@@ -1,11 +1,14 @@
 #include <stdio.h>
 
+// Biblioeteca alterada, substitui as funções unlock() e change().
+
 int unlock() {
     printf("Custom unlock\n");
     return 1;
 }
 
-// Não funcionou, melhor fazer em assembly direto...
+// Não funcionou, melhor fazer a função change() em assembly direto...
+
 // int change(int param_1, int param_2) {
 //     int uVar1;
 
