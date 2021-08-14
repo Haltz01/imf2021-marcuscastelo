@@ -2,32 +2,48 @@
 
 ## Inspecionando os arquivos
 
-Usando alguns comandos disponíveis no Linux como `file`, `hexdump` e `readelf` somos capazes de obter informações importates sobre os arquivos dados. 
+Usando alguns comandos disponíveis no Linux como `file`, `hexdump` e `readelf`, somos capazes de obter informações importates sobre os arquivos dados. 
 
 Usando o `file`, obtemos:
 - Sobre o `decode.o`: `decode.o: ELF 32-bit LSB relocatable, Intel 80386, version 1 (SYSV), not stripped`
 - Sobre o `libcypher.so`: `libcypher.so: ELF 32-bit LSB shared object, Intel 80386, version 1 (SYSV), dynamically linked, BuildID[sha1]=672806f57c71050b90766548830b6e6a1f817f3b, not stripped`
 
-Podemos obter algumas informações extrar olhando o dump desses arquivos e usando o "readelf", mas parece que isso não será necessário...
+Podemos obter algumas informações extras olhando o dump desses arquivos e usando o `readelf`, mas parece que isso não será necessário...
 
 Pelo `hexdump`, também descobrimos que o `decode.o` e o `libcypher.so` foram compilados no GCC em um Ubuntu 20.04:
 ![](https://i.imgur.com/CBpHAxO.png)
 ![](https://i.imgur.com/GIW6Nqm.png)
 
-Usando softwares de _reverse engineering_ como o Ghidra, Binary Ninja e Radare2, podemos descobrir outras informações relevantes e entender melhor o funcionamento dos objetos que temos.
+Usando softwares de _reverse engineering_ como o __Ghidra__, __Binary Ninja__ e __Radare2__, podemos descobrir outras informações relevantes e entender melhor o funcionamento dos objetos que temos.
 
 ## Elaborando Makefile para buildar o "decode"
 
-No Ubuntu 18.04 64 bits, para compilar o "decode" é necessário instalar o GCC para outras arquiteturas - nesse caso 32-bits - usando `sudo apt install gcc-multilib`.
+No Ubuntu 18.04 64 bits, para linkar o objeto decode.o, é necessário instalar o GCC para outras arquiteturas - nesse caso 32-bits - usando `sudo apt install gcc-multilib`.
+No Arch Linux x86_64, os pacotes foram instalados usando `sudo pacman -S lib32-gcc-libs lib32-glibc`.
+
 ## Executando o programa
+
+Para usar o "decode", tanto pelas instruções do desafio como usando `hexdump` ou `strings` é possível descobrir como usar o executável: `decode -d -k <key> <input-file> <output-file>`
+
+Para executar o programa, é necessário informar a pasta na qual a `libcypher.so` está localizada.
+Para isso, no linux é possível usar a variável de ambiente LD_LIBRARY_PATH, a seguir: 
+`LD_LIBRARY_PATH=. ./decode -k <key> <input`
 
 ## Deobfuscando o arquivo "crypt1.dat"
 
-Para usar o "decode", tanto pelas instruções do desafio como usando `hexdump` ou `strings` é possível descobrir como usar o executável: `decode -d -k <key> <input-file> <output-file>`
+
 
 Sendo que `<key>` é a string em ASCII usada para encriptar os dados
 
 Ambos os arquivos foram obfuscados usando a string 'ABC'
+
+Além da `<key>`, o programa pede por uma _unlock key_ (basicamente uma senha de acesso). Tentamos fazer engenharia reversa e deduzir uma senha válida, mas no fim foi mais fácil sobrescrever a função unlock() para retornar _true_ sempre.
+
+![image-20210811145037336](/home/marucs/.config/Typora/typora-user-images/image-20210811145037336.png)
+
+Com isso, o comando `./decode -d -k ABC crypt1.dat crypt1.deobfuscated` funciona corretamente, mas ainda precisamos ver qual é o tipo do arquivo. Para isso, basta rodar `file crypt1.deobsfuscated`. 
+
+
 
 ## Deobfuscando o arquivo "crypt2.dat"
 

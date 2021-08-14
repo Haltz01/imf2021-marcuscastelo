@@ -92,7 +92,7 @@ run-custom-crypt2: decode-custom
 # Usando LD_PRELOAD não alteramos o executável e nos mantemos dentro das especificações do desafio
 # O binário "decode" é o mesmo que o original, então ele busca pela libcypher.so original,
 # porém, o LD_PRELOAD nos permite sobrescrever a função unlock() e a função change() usando o arquivo
-# libcypher-custom.so. A diferença para a abordagem anterior (com -lcyper-custom)
+# libcypher-custom.so. A diferença para a abordagem anterior (com -lcypher-custom)
 # é que o executável "decode" não precisa ser alterado em tempo de link.
 .PHONY: run-ld-preload
 run-ld-preload: decode libcypher-custom.so
