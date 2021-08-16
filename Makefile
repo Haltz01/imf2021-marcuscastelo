@@ -59,10 +59,10 @@ libcypher-custom.so: libcypher-custom.o change-custom.o
 # OBS: sobrescreve a regra anterior para esse objeto, que vem diretamente do assembly
 ifeq ($(CHANGE_CUSTOM_SYNTAX),atnt)
 change-custom.o: change-custom-ATnT.S
-	gcc -c -m32 change-custom-ATnT.S -o change-custom.o -nostdlib -no-pie
+	gcc -c -m32 change-custom-ATnT.S -o change-custom.o -nostdlib -fpic
 else ifeq ($(CHANGE_CUSTOM_SYNTAX),intel)
 change-custom.o: change-custom-INTEL.S
-	gcc -c -m32 change-custom-INTEL.S -o change-custom.o -nostdlib -no-pie
+	gcc -c -m32 change-custom-INTEL.S -o change-custom.o -nostdlib -fpic
 endif
 
 # ===== Execução do programa em condições normais =====
